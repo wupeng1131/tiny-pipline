@@ -15,8 +15,73 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="test.cpp">
+    <ClCompile Include="test2.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="test3.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="main.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="util.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="mnist_parser.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="tiny_cnn.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="network.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="config.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="loss_function.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="activation_function.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="product.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="layer.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="weight_init.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="input_layer.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="layers.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="partial_connected_layer.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="convolutional_layer.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="max_pooling_layer.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="fully_connected_layer.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="dropout.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="average_pooling_layer.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="optimizer.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
