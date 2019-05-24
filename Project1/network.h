@@ -71,7 +71,10 @@ namespace tiny_cnn {
 	class network {
 	public:
 		typedef LossFunction E;
-		explicit network(const std::string &name = "") : name_(name) {};
+		//network():sample_convet(0) {}int outputIndex_ ;
+		//int pre_deltaIndex_;
+		explicit network(const std::string &name = "") : name_(name), sample_count(0)
+			, pre_deltaIndex_(0), current_batch_size_(0){};
 		//getter
 		layer_size_t in_dim() const { return layers_.head()->in_size(); }
 		layer_size_t out_dim() const { return layers_.tail()->out_size(); }
@@ -197,94 +200,67 @@ public:
 	float target_value_max() const { return layers_.tail()->activation_function().scale().second; }
 	/* in , t is address   size is num*/
 	void train_once(const vec_t* in, const vec_t* t, int size, const int nbThreads = CNN_QUEUE_SIZE) {
-	//	if (size == 1) {
-	//		bprop(fprop(in[0]), t[0]);
-	//		layers_.update_weights(&optimizer_, 1, 1);
-	//	}
-	//	else {
-			train_onebatch(in, t, size, nbThreads);
-	//	}
+		train_onebatch(in, t, size, nbThreads);
 	}
 
 
 
-	bool can_process_head(const int& i, const int& j) {
-		CNN_UNREFERENCED_PARAMETER(j);
-		if (i < CNN_QUEUE_SIZE) 
+	bool can_process_head(const int& inputIndex, const int& batch_size) {
+		if (inputIndex < batch_size)
 			return true;
 		else 
 			return false;
 	}
-	bool can_process_tail(const int& i, const int& j) {
-		CNN_UNREFERENCED_PARAMETER(i);
-		if (j >= CNN_QUEUE_SIZE) 
+	bool can_process_tail(const int& pre_deltaIndex, const int& batch_size) {
+		
+		if (pre_deltaIndex >= batch_size)
 			return false;
-		if (layers_.tail()->outputF_[j] == 1)
+		if (layers_.tail()->outputF_[pre_deltaIndex] == 1)
 			return true; 
 		else
 			return false;
 	}
+
+	void b_process() {
+		if (can_process_tail( pre_deltaIndex_, current_batch_size_)) {
+			bprop(layers_.tail()->output_[pre_deltaIndex_], label[pre_deltaIndex_], pre_deltaIndex_);
+			pre_deltaIndex_++;
+		}
+	}
 	void train_onebatch(const vec_t* in, const vec_t* t, int batch_size, const int num_tasks = CNN_QUEUE_SIZE) {
-		assert(batch_size == CNN_QUEUE_SIZE);
-		/*for (int i = 0; i < batch_size; i++) {
-			bprop(fprop(in[i], i), t[i], i);// i is index
-		}*/
-		int i = 0; int j = 0;// i control forward propagation     j control backward propagation
-		while (j < batch_size) {//tail has complete
-			if (can_process_head(i,j)) {
-				//process head
-				fprop(in[i], i);
-					i++;
-					//if (i == CNN_QUEUE_SIZE - 1) { std::cout << "input finished"; }
-			}
-			if (can_process_tail(i,j)) {
-				//process head
-				bprop(layers_.tail()->output_[j], t[j], j);
-				j++;
-			}
-		}
-
-		while (layers_.head()->current_deltaF_[CNN_QUEUE_SIZE - 1] != 1) {}
-		
-		/*for (int i = 0; i < batch_size; i++) {
-			bprop(fprop(in[i]), t[i])
-		}
-		layers_.update_weights(&optimizer_, num_tasks, batch_size);*/
-		/*task_group g;                  //what is task group??
-
-		int data_per_thread = batch_size / num_tasks;  //number of data to use in each thread
-		int remaining = batch_size;
-
-		// divide batch data and invoke [num_tasks] tasks
-		for (int i = 0; i < num_tasks; i++) {
-			int num = i == num_tasks - 1 ? remaining : data_per_thread;
-			//if last task:remaining      else:average num
-			g.run([=] {                //copy
-				//for (int j = 0; j < num; j++) bprop( (in[j], i), t[j], i);
-				int j = 0;
-				while (j < num) {
-					process(i, j, num);//i is a task, num is number per task, j is  data per task
-				}
-			});
-
-			remaining -= num;
-			in += num;
-			t += num;
-		}
-
-		assert(remaining == 0);//???
-		g.wait();
+		/*
+		update global value 
+		@current_batch_size_ and 
+		@label
 		*/
-		//before update the weight it should set a flag that not allow paragation
-		//for (auto pl : layers_.layers_) {
-		//	pl->update_state();
-		//}
-		// merge all dW and update W by optimizer
+		current_batch_size_ = batch_size;
+		label = t;
+
+		int inputIndex = 0;// i control forward propagation     
+		while (inputIndex < batch_size) {//tail has complete
+			if (can_process_head(inputIndex,batch_size)) {			
+				fprop(in[inputIndex], inputIndex);
+				inputIndex++;	//next data
+
+				#ifdef __DEBUG
+					sample_count++; //to inspect the lock
+				#endif // __DEBUG	
+			}
+		}
+
+		while (layers_.head()->next_->prev_deltaF_[batch_size - 1] != 1) {//just look for layer[1]. not layer[0]
+			//todo: can do some small work when waiting
+		}
+		
 		layers_.update_weights(&optimizer_, num_tasks, batch_size);
+
 		// restart state
 		for (auto pl : layers_.layers_) {
 			pl->update_state();
 		}
+		/*update global value , for next batch*/
+		pre_deltaIndex_ = 0;
+		
 	}
 
 	const vec_t& fprop_test(const vec_t& in, int index = 0) {
@@ -292,8 +268,7 @@ public:
 		auto l = layers_.head();
 		l->forward_propagation(in, index);
 		l = l->next();
-		for (int i = 1; i < layers_.layers_.size(); i++)
-			//vec_t m_out = l->prev()->output(0);
+		for (size_t i = 1; i < layers_.layers_.size(); i++)
 		{
 			l->forward_propagation(l->prev()->output(index), index);
 			l = l->next();
@@ -302,9 +277,12 @@ public:
 		return layers_.tail()->output_[index];
 	}
 	const vec_t& fprop(const vec_t& in,int index = 0) {
-		if (in.size() != (size_t)in_dim() )  data_mismatch(*layers_[0], in);
+		if (in.size() != (size_t)in_dim()) { 
+			data_mismatch(*layers_[0], in);
+		}
 		layers_.head()->output_[index] = in;
 		layers_.head()->outputF_[index] = 1;
+		
 		return in;
 		//return layers_.head()->forward_propagation(in, index);
 	}
@@ -333,7 +311,6 @@ public:
 				delta[i] = vectorize::dot(&dE_dy[0], &dy_da[0], out_dim());
 		}
 		}
-		//layers_.tail()->back_propagation(delta, idx);
 		layers_.tail()->current_delta_[idx] = delta;
 		layers_.tail()->current_deltaF_[idx] = 1;
 	}
@@ -383,6 +360,10 @@ public:
 		std::string name_;
 		Optimizer optimizer_;
 		layers layers_;
+		int sample_count;
+		int pre_deltaIndex_;
+		int current_batch_size_;
+		const vec_t* label;
 
 
 
@@ -399,16 +380,18 @@ public:
 	};
 
 	template <typename L, typename O, typename Layer>
-	network<L, O>& operator <<(network<L, O>& n, const Layer&& l) {
+	network<L, O>& operator <<(network<L, O>& n,  Layer&& l) {
+		
+		l.layerIndex_ = n.layers_.layers_.size();
 		n.add(std::make_shared<Layer>(l));
 		return n;
 	}
 
-	template<typename L, typename O, typename Layer>
+	/*template<typename L, typename O, typename Layer>
 	network<L, O> operator << (network<L, O>& n, Layer& l) {
 		n.add(std::make_shared<Layer>(l));
 		return n;
-	}
+	}*/
 
 	template <typename L, typename O, typename Char, typename CharTraits>
 	std::basic_ostream<Char, CharTraits>& operator << (std::basic_ostream<Char, CharTraits>& os, const network<L, O>& n) {

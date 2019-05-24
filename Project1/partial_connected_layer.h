@@ -124,14 +124,16 @@ namespace tiny_cnn {
 
 		/**************process**************/
 		void initIndex(int& outputIndex, int& pre_deltaIndex) {
-			if (outputF_[0] == 2) { outputIndex = 0; pre_deltaIndex = 0; not_ready_state();
-			}//updateing state, reset the index
+			if (outputF_[0] == 2) { outputIndex = 0;
+			pre_deltaIndex = 0;
+			not_ready_state();
+			}
 		}
 		bool can_forward(const int& outputIndex, const int& pre_deltaIndex) {
 			CNN_UNREFERENCED_PARAMETER(pre_deltaIndex);
-			if (outputIndex >= CNN_QUEUE_SIZE) return false;//bug: index overflow
+			if (outputIndex >= CNN_QUEUE_SIZE) return false;
 			if (prev_->outputF_[outputIndex] == 1 ) return true;
-			else return false;//not compute and not full
+			else return false;
 		}
 		bool can_backward(const int& outputIndex, const int& pre_deltaIndex) {
 			if (pre_deltaIndex >= CNN_QUEUE_SIZE) return false;
@@ -146,6 +148,54 @@ namespace tiny_cnn {
 					return true;
 				else
 					return false;
+			}
+		}
+
+		void f_process()override {
+			
+			initIndex(outputIndex_, pre_deltaIndex_);
+			if (can_forward(outputIndex_, pre_deltaIndex_)) {
+			#ifdef __PRINT_TIME
+				m_time t;
+			#endif // __PRINT_TIME
+
+			forward_propagation(prev_->output_[outputIndex_], outputIndex_);
+
+			#ifdef __PRINT_TIME
+				if (f_print_) {
+					double tmp = t.elapsed();
+					f_time += tmp;
+					f_print_--;
+					if (f_print_ == 0) std::cout << "f_layer" << layerIndex_ << ":" << f_time / PRINT_COUNT << "ms" << std::endl;
+				}
+			#endif // __PRINT_TIME
+
+			outputF_[outputIndex_] = 1;
+			outputIndex_++;
+			}
+		}
+		void b_process()override {
+			initIndex(outputIndex_, pre_deltaIndex_);
+			if (can_backward(outputIndex_, pre_deltaIndex_)) {
+				
+			#ifdef __PRINT_TIME
+				m_time t;
+			#endif // __PRINT_TIME
+			
+			back_propagation(next_->prev_delta_[pre_deltaIndex_], pre_deltaIndex_);
+
+			#ifdef __PRINT_TIME
+				if (b_print_) {
+					double tmp = t.elapsed();
+					b_time += tmp;
+					b_print_--;
+					if (b_print_ == 0) std::cout << "b_layer" << layerIndex_ << ":" << b_time / PRINT_COUNT << "ms" << std::endl;
+				}
+			#endif // __PRINT_TIME
+
+			prev_deltaF_[pre_deltaIndex_] = 1;
+			current_deltaF_[pre_deltaIndex_] = 1;
+			pre_deltaIndex_++;
 			}
 		}
 		void process() {  

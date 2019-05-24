@@ -7,6 +7,8 @@
 #include <cassert>
 #include <cstdio>
 #include <cstdarg>
+//#include<boost/timer.hpp>
+#include <windows.h>
 
 #ifdef CNN_USE_TBB
 #ifndef NOMINMAX
@@ -31,6 +33,23 @@ namespace tiny_cnn {
 		const char* what() const throw() override { return msg_.c_str(); }
 	private:
 		std::string msg_;
+	};
+
+	struct m_time {
+		m_time() {
+			QueryPerformanceFrequency(&nFreq);
+			QueryPerformanceCounter(&nBeginTime);//begin time*/
+		}
+		double elapsed() {
+			QueryPerformanceCounter(&nEndTime); //结束执行的时间
+			t = 1000 * (double)(nEndTime.QuadPart - nBeginTime.QuadPart) / (double)nFreq.QuadPart;
+			return t;
+		}
+
+		LARGE_INTEGER nFreq;
+		LARGE_INTEGER nBeginTime;
+		LARGE_INTEGER nEndTime;
+		double t;
 	};
 
 	template <typename T>

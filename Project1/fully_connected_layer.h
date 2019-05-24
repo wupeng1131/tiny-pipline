@@ -51,7 +51,7 @@ namespace tiny_cnn {
 			vec_t& dW = dW_[index];
 			vec_t& db = db_[index];
 
-			for (int c = 0; c < this->fan_in_size(); c++) {
+			for (size_t c = 0; c < this->fan_in_size(); c++) {
 				prev_delta[c] = vectorize::dot(&curr_delta[0], &W_[c*out_size_], out_size_);
 				prev_delta[c] *= prev_h.df(prev_out[c]);
 			}
@@ -71,15 +71,17 @@ namespace tiny_cnn {
 		std::string layer_type() const override { return "fully-connected"; }
 		/******************************************/
 		void initIndex(int& outputIndex, int& pre_deltaIndex) {
-			if (outputF_[0] == 2) { outputIndex = 0; pre_deltaIndex = 0;
-			not_ready_state();
-			}//updateing state, reset the index
+			if (outputF_[0] == 2) { 
+				outputIndex = 0; 
+				pre_deltaIndex = 0;
+				not_ready_state();
+			}
 		}
 		bool can_forward(const int& outputIndex, const int& pre_deltaIndex) {
 			CNN_UNREFERENCED_PARAMETER(pre_deltaIndex);
 			if (outputIndex >= CNN_QUEUE_SIZE) return false;//bug: index overflow
 			if (prev_->outputF_[outputIndex] == 1) return true;
-			else return false;//not compute and not full
+			else return false;
 		}
 		bool can_backward(const int& outputIndex, const int& pre_deltaIndex) {
 			if (pre_deltaIndex >= CNN_QUEUE_SIZE) return false;
@@ -96,6 +98,89 @@ namespace tiny_cnn {
 					return false;
 			}
 			
+		}
+
+		void f_process()override {
+			initIndex(outputIndex_, pre_deltaIndex_);
+			if (can_forward(outputIndex_, pre_deltaIndex_)) {
+			#ifdef __PRINT_TIME
+				m_time t;
+			#endif // __PRINT_TIME
+
+			forward_propagation(prev_->output_[outputIndex_], outputIndex_);
+
+			#ifdef __PRINT_TIME
+				if (f_print_) {
+					double tmp = t.elapsed();
+					f_time += tmp;
+					f_print_--;
+					if(f_print_ ==0) std::cout << "f_layer" << layerIndex_ << ":" << f_time/ PRINT_COUNT << "ms" << std::endl;
+				}
+			#endif // __PRINT_TIME
+
+			outputF_[outputIndex_] = 1;
+			outputIndex_++;
+			}
+		}
+		void b_process()override {
+			initIndex(outputIndex_, pre_deltaIndex_);
+
+			if (can_backward(outputIndex_, pre_deltaIndex_)) {
+				#ifdef __PRINT_TIME
+				m_time t;
+				#endif // __PRINT_TIME
+				if (next_) {
+					back_propagation(next_->prev_delta_[pre_deltaIndex_], pre_deltaIndex_);
+				}
+				else {
+					back_propagation(current_delta_[pre_deltaIndex_], pre_deltaIndex_);
+				}
+
+				#ifdef __PRINT_TIME
+				if (b_print_) {
+					double tmp = t.elapsed();
+					b_time += tmp;
+					b_print_--;
+					if (b_print_ == 0) std::cout << "b_layer" << layerIndex_ << ":" << b_time / PRINT_COUNT << "ms" << std::endl;
+				}
+				#endif // __PRINT_TIME
+				prev_deltaF_[pre_deltaIndex_] = 1;
+				current_deltaF_[pre_deltaIndex_] = 1;
+				pre_deltaIndex_++;
+			
+			}
+			/*if (can_backward(outputIndex_, pre_deltaIndex_)) {
+				
+				if (next_) {
+					m_time t;
+					back_propagation(next_->prev_delta_[pre_deltaIndex_], pre_deltaIndex_);
+					if (b_print_) {
+						double tmp = t.elapsed();
+						b_time += tmp;
+						//std::cout << "b_layer" << layerIndex_ << ":" << tmp << "ms" << std::endl;
+						b_print_--;
+						if(b_print_ == 0) std::cout << "b_layer" << layerIndex_ << ":" << b_time/ PRINT_COUNT << "ms" << std::endl;
+					}
+					//if (pre_deltaIndex_ == CNN_QUEUE_SIZE - 1) { std::cout << "fully_connected backward finished" << std::endl; }
+					prev_deltaF_[pre_deltaIndex_] = 1;
+					pre_deltaIndex_++;
+				}
+				else {
+					
+					m_time t;
+					back_propagation(current_delta_[pre_deltaIndex_], pre_deltaIndex_);
+					if (b_print_) {
+						double tmp = t.elapsed();
+						b_time += tmp;
+						//std::cout << "b_layer" << layerIndex_ << ":" << tmp << "ms" << std::endl;
+						b_print_--;
+						if (b_print_ == 0) std::cout << "b_layer" << layerIndex_ << ":" << b_time / PRINT_COUNT << "ms" << std::endl;
+					}
+						//if (pre_deltaIndex == CNN_QUEUE_SIZE - 1) { std::cout << "last_fully_connected backward finished" << std::endl; }
+						prev_deltaF_[pre_deltaIndex_] = 1;
+						pre_deltaIndex_++;
+				}
+			}*/
 		}
 
 		void process() {

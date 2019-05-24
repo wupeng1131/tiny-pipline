@@ -24,6 +24,12 @@ namespace tiny_cnn {
 				prev_deltaF_[i] = 0;
 				current_deltaF_[i] = 0;
 			}
+			outputIndex_ = 0;  pre_deltaIndex_ = 0;
+			layerIndex_ = 0;
+			f_print_ = PRINT_COUNT;
+			b_print_ = PRINT_COUNT;
+			f_time = 0;
+			b_time = 0;
 			set_size(in_dim, out_dim, weight_dim, bias_dim);
 		}
 
@@ -150,13 +156,26 @@ namespace tiny_cnn {
 
 		void update_state() {
 			outputF_[0] = 2;
-			/*for (int i = 0; i < CNN_QUEUE_SIZE; i++) {
-				outputF_[i] = 2;  prev_deltaF_[i] = 2;
-				current_deltaF_[i] = 2;
-			}*/
+			
 		}
 
 		virtual void process() = 0;
+		virtual void f_process() = 0;
+		virtual void b_process() = 0;
+		virtual void print_state() {
+			std::cout << "layer(" << layerIndex_ << "):";
+			std::cout << "out->[";
+			for (int i = 0; i < CNN_QUEUE_SIZE; i++)  std::cout << outputF_[i] << " ";
+			std::cout << "]";
+
+			std::cout << "prev_delta->[";
+			for (int i = 0; i < CNN_QUEUE_SIZE; i++)  std::cout << prev_deltaF_[i] << " ";
+			std::cout << "]";
+
+			std::cout << "current_delta->[";
+			for (int i = 0; i < CNN_QUEUE_SIZE; i++)  std::cout << current_deltaF_[i] << " ";
+			std::cout << "]" << std::endl;
+		}
 
 	public:
 		layer_size_t in_size_;
@@ -176,6 +195,14 @@ namespace tiny_cnn {
 		vec_t db_[CNN_QUEUE_SIZE];
 		vec_t current_delta_[CNN_QUEUE_SIZE];
 		size_t current_deltaF_[CNN_QUEUE_SIZE];
+		int outputIndex_ ;
+		int pre_deltaIndex_ ;
+		int layerIndex_;
+		int f_print_;
+		int b_print_;
+		double f_time;
+		double b_time;
+		int test[CNN_QUEUE_SIZE];
 
 		std::shared_ptr<weight_init::function> weight_init_; // this is a pointer
 		std::shared_ptr<weight_init::function> bias_init_;
