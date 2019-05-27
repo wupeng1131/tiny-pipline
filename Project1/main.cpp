@@ -5,7 +5,7 @@
 #include"tiny_cnn.h"
 //
 //int global_count = 0;
-
+#if 0
 using namespace tiny_cnn;
 //using namespace std;
 using namespace tiny_cnn::activation;
@@ -174,12 +174,13 @@ void sample_convet() {
 	boost::timer t;
 
 	network<mse, gradient_denscent> nn;
-	nn  << convolutional_layer<tan_h>(32, 32, 5, 1, 6)    //1
-		<< average_pooling_layer<tan_h>(28, 28, 6, 2)     //2
-		<< convolutional_layer<tan_h>(14, 14, 5, 6, 16)   //3
-		<< average_pooling_layer<tan_h>(10, 10, 16, 2)    //4
-		<< convolutional_layer<tan_h>(5, 5, 5, 16, 120)   //5
-		<< fully_connectioned_layer<tan_h>(120, 10);      //6
+	nn << convolutional_layer<tan_h>(32, 32, 5,5, 1, 6, padding::same, true, 1, 1);   //1
+	nn << average_pooling_layer<tan_h>(32, 32, 6, 2);    //2
+	nn << convolutional_layer<tan_h>(16, 16, 5,5, 6, 16, padding::same, true, 1, 1); //3
+	nn << average_pooling_layer<tan_h>(16, 16, 16, 2);    //4
+	nn << convolutional_layer<tan_h>(8, 8, 8,8, 16, 120, padding::valid, true, 1, 1);   //5
+
+	nn << fully_connectioned_layer<tan_h>(120, 10);      //6
 
 	/***********load the weight***************/
 	//nn.load("LeNet-weights");
@@ -241,6 +242,7 @@ void sample_convet() {
 	std::ofstream ofs("LeNet-weights");
 	ofs << nn;
 }
-int main() {
+int main1() {
 	sample_convet();
 }//
+#endif

@@ -74,7 +74,12 @@ namespace tiny_cnn {
 		//network():sample_convet(0) {}int outputIndex_ ;
 		//int pre_deltaIndex_;
 		explicit network(const std::string &name = "") : name_(name), sample_count(0)
-			, pre_deltaIndex_(0), current_batch_size_(0){};
+			, pre_deltaIndex_(0), current_batch_size_(0){
+			f_print_ = PRINT_COUNT;
+			b_print_ = PRINT_COUNT;
+			f_time = 0;
+			b_time = 0;
+		};
 		//getter
 		layer_size_t in_dim() const { return layers_.head()->in_size(); }
 		layer_size_t out_dim() const { return layers_.tail()->out_size(); }
@@ -223,7 +228,20 @@ public:
 
 	void b_process() {
 		if (can_process_tail( pre_deltaIndex_, current_batch_size_)) {
+#ifdef __PRINT_TIME
+			m_time t;
+#endif // __PRINT_TIME
 			bprop(layers_.tail()->output_[pre_deltaIndex_], label[pre_deltaIndex_], pre_deltaIndex_);
+			
+
+#ifdef __PRINT_TIME
+			if (b_print_) {
+				double tmp = t.elapsed();
+				b_time += tmp;
+				b_print_--;
+				if (b_print_ == 0) std::cout << "net_back" << ":" << b_time / PRINT_COUNT << "ms" << std::endl;
+			}
+#endif // __PRINT_TIME
 			pre_deltaIndex_++;
 		}
 	}
@@ -238,7 +256,8 @@ public:
 
 		int inputIndex = 0;// i control forward propagation     
 		while (inputIndex < batch_size) {//tail has complete
-			if (can_process_head(inputIndex,batch_size)) {			
+			if (can_process_head(inputIndex,batch_size)) {	
+				//std::cout << "0";
 				fprop(in[inputIndex], inputIndex);
 				inputIndex++;	//next data
 
@@ -364,6 +383,10 @@ public:
 		int pre_deltaIndex_;
 		int current_batch_size_;
 		const vec_t* label;
+		int f_print_;
+		int b_print_;
+		double f_time;
+		double b_time;
 
 
 

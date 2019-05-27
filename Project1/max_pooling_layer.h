@@ -66,12 +66,15 @@ namespace tiny_cnn {
 				}
 			});
 			//return prev_->back_propagation(prev_delta_[index], index);
-			return;
+			return prev_delta_[index];
 		}
 
 		/******************************************/
 		void initIndex(int& outputIndex, int& pre_deltaIndex) {
-			if (outputF_[0] == 2) { outputIndex = 0; pre_deltaIndex = 0; }//updateing state, reset the index
+			if (outputF_[0] == 2) { outputIndex = 0;
+			pre_deltaIndex = 0;
+			not_ready_state();
+			}//updateing state, reset the index
 		}
 		bool can_forward(const int& outputIndex, const int& pre_deltaIndex) {
 			CNN_UNREFERENCED_PARAMETER(pre_deltaIndex);
@@ -81,10 +84,18 @@ namespace tiny_cnn {
 		}
 		bool can_backward(const int& outputIndex, const int& pre_deltaIndex) {
 			if (pre_deltaIndex >= CNN_QUEUE_SIZE) return false;
-			//if ( next_->prev_deltaF_[pre_deltaIndex] == 1 && pre_deltaIndex < CNN_QUEUE_SIZE && outputF_[0] != 2) {
-			//	return true;
-			//}
-			else return false;
+			if (next_) {
+				if (next_->prev_deltaF_[pre_deltaIndex] == 1)
+					return true;
+				else
+					return false;
+			}
+			else {
+				if (current_deltaF_[pre_deltaIndex] == 1)
+					return true;
+				else
+					return false;
+			}
 		}
 
 		void f_process()override {
@@ -97,11 +108,11 @@ namespace tiny_cnn {
 			forward_propagation(prev_->output_[outputIndex_], outputIndex_);
 
 			#ifdef __PRINT_TIME
-				if (b_print_) {
+				if (f_print_) {
 					double tmp = t.elapsed();
-					b_time += tmp;
-					b_print_--;
-					if (b_print_ == 0) std::cout << "b_layer" << layerIndex_ << ":" << b_time / PRINT_COUNT << "ms" << std::endl;
+					f_time += tmp;
+					f_print_--;
+					if (f_print_ == 0) std::cout << "f_layer" << layerIndex_ << ":" << f_time / PRINT_COUNT << "ms" << std::endl;
 				}
 			#endif // __PRINT_TIME
 
@@ -146,7 +157,7 @@ namespace tiny_cnn {
 					outputIndex++;
 				}
 
-				if (can_backward()) {
+				if (can_backward(outputIndex, pre_deltaIndex)) {
 					//backward process
 					back_propagation(next_->prev_delta_[pre_deltaIndex], pre_deltaIndex);
 					prev_deltaF_[pre_deltaIndex] = 1;
