@@ -30,6 +30,7 @@ namespace tiny_cnn {
 			b_print_ = PRINT_COUNT;
 			f_time = 0;
 			b_time = 0;
+			global_count = 0;
 			set_size(in_dim, out_dim, weight_dim, bias_dim);
 		}
 
@@ -203,6 +204,7 @@ namespace tiny_cnn {
 		double f_time;
 		double b_time;
 		int test[CNN_QUEUE_SIZE];
+		int global_count;
 
 		std::shared_ptr<weight_init::function> weight_init_; // this is a pointer
 		std::shared_ptr<weight_init::function> bias_init_;
@@ -239,7 +241,7 @@ namespace tiny_cnn {
 			}
 		}
 	};
-
+	//int layer_base::global_count = 0;
 
 	template<typename Activation>
 	class layer : public layer_base {

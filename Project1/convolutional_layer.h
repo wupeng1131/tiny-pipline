@@ -60,7 +60,7 @@ namespace tiny_cnn {
 			cnn_size_t window_size,
 			cnn_size_t in_channels,
 			cnn_size_t out_channels,
-			const connection_table& connection_table,
+//			const connection_table& connection_table,
 			padding pad_type = padding::valid,
 			bool has_bias = true,
 			cnn_size_t w_stride = 1,
@@ -68,7 +68,7 @@ namespace tiny_cnn {
 		)
 			: Base(in_width * in_height * in_channels, conv_out_dim(in_width, in_height, window_size, w_stride, h_stride, pad_type) * out_channels,
 				sqr(window_size) * in_channels * out_channels, has_bias ? out_channels : 0),
-			tbl_(connection_table),
+//			tbl_(connection_table),
 			in_(in_width, in_height, in_channels),
 			in_padded_(in_length(in_width, window_size, pad_type), in_length(in_height, window_size, pad_type), in_channels),
 			out_(conv_out_length(in_width, window_size, w_stride, pad_type), conv_out_length(in_height, window_size, h_stride, pad_type), out_channels),
@@ -344,6 +344,7 @@ namespace tiny_cnn {
 #endif // __PRINT_TIME
 
 				back_propagation(next_->prev_delta_[pre_deltaIndex_], pre_deltaIndex_);
+				
 
 #ifdef __PRINT_TIME
 				if (b_print_) {
@@ -357,6 +358,11 @@ namespace tiny_cnn {
 				prev_deltaF_[pre_deltaIndex_] = 1;
 				current_deltaF_[pre_deltaIndex_] = 1;
 				pre_deltaIndex_++;
+
+				if (layerIndex_ == 1) {
+					global_count++;
+				//	std::cout << global_count << " ";
+				}
 			}
 		}
 

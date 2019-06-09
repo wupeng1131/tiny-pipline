@@ -11,7 +11,7 @@ using namespace tiny_cnn;
 using namespace tiny_cnn::activation;
 void sample_convet();
 DWORD WINAPI p0(LPVOID lpParameter) {
-	network<mse, gradient_denscent> *nn = (network<mse, gradient_denscent> *)lpParameter;
+	network<mse, OPT> *nn = (network<mse, OPT> *)lpParameter;
 	while (1) {
 		//((nn->layers_).layers_[0])->f_process();
 		((nn->layers_).layers_[1])->f_process();
@@ -33,7 +33,7 @@ DWORD WINAPI p0(LPVOID lpParameter) {
 	return 0;
 }
 DWORD WINAPI p1(LPVOID lpParameter) {
-	network<mse, gradient_denscent> *nn = (network<mse, gradient_denscent> *)lpParameter;
+	network<mse, OPT> *nn = (network<mse, OPT> *)lpParameter;
 	while (1) {
 		//((nn->layers_).layers_[0])->f_process();
 		//((nn->layers_).layers_[1])->f_process();
@@ -44,11 +44,11 @@ DWORD WINAPI p1(LPVOID lpParameter) {
 		((nn->layers_).layers_[6])->f_process();
 		nn->b_process();
 		((nn->layers_).layers_[6])->b_process();
-		((nn->layers_).layers_[5])->b_process();
-		((nn->layers_).layers_[4])->b_process();
-		((nn->layers_).layers_[3])->b_process();
-		((nn->layers_).layers_[2])->b_process();
-		((nn->layers_).layers_[1])->b_process();
+		//((nn->layers_).layers_[5])->b_process();
+		//((nn->layers_).layers_[4])->b_process();
+		//((nn->layers_).layers_[3])->b_process();
+		//((nn->layers_).layers_[2])->b_process();
+		//((nn->layers_).layers_[1])->b_process();
 		//((nn->layers_).layers_[0])->b_process();
 		
 	}
@@ -56,19 +56,19 @@ DWORD WINAPI p1(LPVOID lpParameter) {
 	return 0;
 }
 DWORD WINAPI p2(LPVOID lpParameter) {
-	network<mse, gradient_denscent> *nn = (network<mse, gradient_denscent> *)lpParameter;
+	network<mse, OPT> *nn = (network<mse, OPT> *)lpParameter;
 	while (1) {
 		//((nn->layers_).layers_[0])->f_process();
 		//((nn->layers_).layers_[1])->f_process();
 		//((nn->layers_).layers_[2])->f_process();
 		//((nn->layers_).layers_[3])->f_process();
-		((nn->layers_).layers_[4])->f_process();
-		((nn->layers_).layers_[5])->f_process();
-		((nn->layers_).layers_[6])->f_process();
-		nn->b_process();
-		((nn->layers_).layers_[6])->b_process();
+		//((nn->layers_).layers_[4])->f_process();
+		//((nn->layers_).layers_[5])->f_process();
+		//((nn->layers_).layers_[6])->f_process();
+		//nn->b_process();
+		//((nn->layers_).layers_[6])->b_process();
 		((nn->layers_).layers_[5])->b_process();
-		//((nn->layers_).layers_[4])->b_process();
+		((nn->layers_).layers_[4])->b_process();
 		//((nn->layers_).layers_[3])->b_process();
 		//((nn->layers_).layers_[2])->b_process();
 		//((nn->layers_).layers_[1])->b_process();
@@ -79,7 +79,7 @@ DWORD WINAPI p2(LPVOID lpParameter) {
 	return 0;
 }
 DWORD WINAPI p3(LPVOID lpParameter) {
-	network<mse, gradient_denscent> *nn = (network<mse, gradient_denscent> *)lpParameter;
+	network<mse, OPT> *nn = (network<mse, OPT> *)lpParameter;
 	//((nn->layers_).layers_[3])->process();
 	while (1) {
 		//((nn->layers_).layers_[0])->f_process();
@@ -91,9 +91,9 @@ DWORD WINAPI p3(LPVOID lpParameter) {
 		//((nn->layers_).layers_[6])->f_process();
 		//((nn->layers_).layers_[6])->b_process();
 		//((nn->layers_).layers_[5])->b_process();
-		((nn->layers_).layers_[4])->b_process();
+		//((nn->layers_).layers_[4])->b_process();
 		((nn->layers_).layers_[3])->b_process();
-		((nn->layers_).layers_[2])->b_process();
+		//((nn->layers_).layers_[2])->b_process();
 		//((nn->layers_).layers_[1])->b_process();
 		//((nn->layers_).layers_[0])->b_process();
 		
@@ -101,7 +101,7 @@ DWORD WINAPI p3(LPVOID lpParameter) {
 	return 0;
 }
 DWORD WINAPI p4(LPVOID lpParameter) {
-	network<mse, gradient_denscent> *nn = (network<mse, gradient_denscent> *)lpParameter;
+	network<mse, OPT> *nn = (network<mse, OPT> *)lpParameter;
 	while (1) {
 		//((nn->layers_).layers_[0])->f_process();
 		//((nn->layers_).layers_[1])->f_process();
@@ -114,7 +114,7 @@ DWORD WINAPI p4(LPVOID lpParameter) {
 		//((nn->layers_).layers_[5])->b_process();
 		//((nn->layers_).layers_[4])->b_process();
 		//((nn->layers_).layers_[3])->b_process();
-		//((nn->layers_).layers_[2])->b_process();
+		((nn->layers_).layers_[2])->b_process();
 		((nn->layers_).layers_[1])->b_process();
 		//((nn->layers_).layers_[0])->b_process();
 
@@ -122,17 +122,17 @@ DWORD WINAPI p4(LPVOID lpParameter) {
 	return 0;
 }
 DWORD WINAPI p5(LPVOID lpParameter) {
-	network<mse, gradient_denscent> *nn = (network<mse, gradient_denscent> *)lpParameter;
+	network<mse, OPT> *nn = (network<mse, OPT> *)lpParameter;
 	((nn->layers_).layers_[5])->process();
 	return 0;
 }
 DWORD WINAPI p6(LPVOID lpParameter) {
-	network<mse, gradient_denscent> *nn = (network<mse, gradient_denscent> *)lpParameter;
+	network<mse, OPT> *nn = (network<mse, OPT> *)lpParameter;
 	((nn->layers_).layers_[6])->process();
 	return 0;
 }
 DWORD WINAPI inspect(LPVOID lpParameter) {
-	network<mse, gradient_denscent> *nn = (network<mse, gradient_denscent> *)lpParameter;
+	network<mse, OPT> *nn = (network<mse, OPT> *)lpParameter;
 	int layer_num = (nn->layers_).layers_.size();
 	int count=nn->sample_count;
 	while (1) {
@@ -173,7 +173,7 @@ void sample_convet() {
 	
 	boost::timer t;
 
-	network<mse, gradient_denscent> nn;
+	network<mse, OPT> nn;
 	nn << convolutional_layer<tan_h>(32, 32, 5,5, 1, 6, padding::same, true, 1, 1);   //1
 	nn << average_pooling_layer<tan_h>(32, 32, 6, 2);    //2
 	nn << convolutional_layer<tan_h>(16, 16, 5,5, 6, 16, padding::same, true, 1, 1); //3
@@ -191,8 +191,8 @@ void sample_convet() {
 
 	auto on_enumerate_epoch = [&]() {
 		std::cout << t.elapsed() << "s elapsed." << std::endl;
-		//tiny_cnn::result res = nn.test(test_images, test_labels);
-		//std::cout << nn.optimizer().alpha << "," << res.num_success << "/" << res.num_total << std::endl;
+		tiny_cnn::result res = nn.test(test_images, test_labels);
+		std::cout << nn.optimizer().alpha << "," << res.num_success << "/" << res.num_total << std::endl;
 
 		nn.optimizer().alpha *= 0.85;//decay
 		nn.optimizer().alpha = max(0.00001, nn.optimizer().alpha);
@@ -217,9 +217,9 @@ void sample_convet() {
 	HANDLE h0,h1,h2,h3,h4,h5,h6,h7;
 	h0 = CreateThread(NULL, 0, p0, &nn, 0, NULL);
 	h1 = CreateThread(NULL, 0, p1, &nn, 0, NULL);
-	//h2 = CreateThread(NULL, 0, p2, &nn, 0, NULL);
-	//h3 = CreateThread(NULL, 0, p3, &nn, 0, NULL);
-	//h4 = CreateThread(NULL, 0, p4, &nn, 0, NULL);
+	h2 = CreateThread(NULL, 0, p2, &nn, 0, NULL);
+	h3 = CreateThread(NULL, 0, p3, &nn, 0, NULL);
+	h4 = CreateThread(NULL, 0, p4, &nn, 0, NULL);
 	/*h5 = CreateThread(NULL, 0, p5, &nn, 0, NULL);
 	h6 = CreateThread(NULL, 0, p6, &nn, 0, NULL);
 	*/
@@ -242,7 +242,7 @@ void sample_convet() {
 	std::ofstream ofs("LeNet-weights");
 	ofs << nn;
 }
-int main1() {
+int main() {
 	sample_convet();
 }//
 #endif

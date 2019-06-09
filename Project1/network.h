@@ -120,6 +120,11 @@ namespace tiny_cnn {
 					//delete the operation  of  is_exploded()
 				}
 				on_epoch_enumerate();
+				//for (auto pl : layers_.layers_) {//bug: each epoch need to update flag
+				//	pl->not_ready_state();
+				//}
+				//Sleep(1000);
+				layers_.layers_[1]->global_count = 0;
 			}
 			return true;
 		}
@@ -140,6 +145,7 @@ namespace tiny_cnn {
 				if (predicted == actual) test_result.num_success++;
 				test_result.num_total++;
 				test_result.confusion_matrix[predicted][actual]++;
+				//std::cout << i << " ";
 			}
 			return test_result;
 		}
@@ -225,9 +231,15 @@ public:
 		else
 			return false;
 	}
-
+	void initIndex(int& pre_deltaIndex) {
+		if (layers_.tail()->outputF_[0] == 2) {
+			pre_deltaIndex = 0;
+		}
+	}
 	void b_process() {
+		//initIndex(pre_deltaIndex_);
 		if (can_process_tail( pre_deltaIndex_, current_batch_size_)) {
+			
 #ifdef __PRINT_TIME
 			m_time t;
 #endif // __PRINT_TIME
@@ -242,6 +254,7 @@ public:
 				if (b_print_ == 0) std::cout << "net_back" << ":" << b_time / PRINT_COUNT << "ms" << std::endl;
 			}
 #endif // __PRINT_TIME
+			//layers_.tail()->current_deltaF_[pre_deltaIndex_] = 1;
 			pre_deltaIndex_++;
 		}
 	}
@@ -257,13 +270,15 @@ public:
 		int inputIndex = 0;// i control forward propagation     
 		while (inputIndex < batch_size) {//tail has complete
 			if (can_process_head(inputIndex,batch_size)) {	
+#ifdef __DEBUG
+				sample_count++; //to inspect the lock
+#endif // __DEBUG	
+		
 				//std::cout << "0";
 				fprop(in[inputIndex], inputIndex);
+
 				inputIndex++;	//next data
 
-				#ifdef __DEBUG
-					sample_count++; //to inspect the lock
-				#endif // __DEBUG	
 			}
 		}
 
@@ -272,14 +287,14 @@ public:
 		}
 		
 		layers_.update_weights(&optimizer_, num_tasks, batch_size);
-
+		
 		// restart state
 		for (auto pl : layers_.layers_) {
 			pl->update_state();
 		}
 		/*update global value , for next batch*/
 		pre_deltaIndex_ = 0;
-		
+		current_batch_size_ = 0;//bug!!!!! hard to find it 
 	}
 
 	const vec_t& fprop_test(const vec_t& in, int index = 0) {

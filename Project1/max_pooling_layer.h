@@ -129,7 +129,7 @@ namespace tiny_cnn {
 			#endif // __PRINT_TIME
 
 			back_propagation(next_->prev_delta_[pre_deltaIndex_], pre_deltaIndex_);
-
+			
 			#ifdef __PRINT_TIME
 				if (b_print_) {
 					double tmp = t.elapsed();

@@ -126,6 +126,7 @@ namespace tiny_cnn {
 			initIndex(outputIndex_, pre_deltaIndex_);
 
 			if (can_backward(outputIndex_, pre_deltaIndex_)) {
+				
 				#ifdef __PRINT_TIME
 				m_time t;
 				#endif // __PRINT_TIME

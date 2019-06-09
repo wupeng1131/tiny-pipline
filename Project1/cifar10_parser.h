@@ -9,6 +9,7 @@
 #define CIFAR10_IMAGE_HEIGHT (32)
 #define CIFAR10_IMAGE_AREA (CIFAR10_IMAGE_WIDTH*CIFAR10_IMAGE_HEIGHT)
 #define CIFAR10_IMAGE_SIZE (CIFAR10_IMAGE_AREA*CIFAR10_IMAGE_DEPTH)
+//#define NUM 200
 
 
 namespace tiny_cnn {
@@ -43,8 +44,8 @@ namespace tiny_cnn {
 
 		uint8_t label;
 		std::vector<unsigned char> buf(CIFAR10_IMAGE_SIZE);
-
-		while (ifs.read((char*)&label, 1)) {
+		//int i = 0;
+		while (ifs.read((char*)&label, 1)/* && i < NUM*/ ) {
 			vec_t img;
 
 			if (!ifs.read((char*)&buf[0], CIFAR10_IMAGE_SIZE)) break;
@@ -73,6 +74,7 @@ namespace tiny_cnn {
 
 			train_images->push_back(img);
 			train_labels->push_back(label);
+			//i++;
 		}
 	}
 

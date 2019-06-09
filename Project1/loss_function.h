@@ -38,6 +38,9 @@ public:
 template <typename E>
 vec_t gradient(const vec_t& y, const vec_t& t) {
 	vec_t grad(y.size());
+	if (y.size() != t.size()) {
+		std::cout << "(" << y.size() << "!=" << t.size()<<")";
+	}
 	assert(y.size() == t.size());
 
 	for (size_t i = 0; i < y.size(); i++) {
